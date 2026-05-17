@@ -208,24 +208,17 @@ namespace IGP
     {
         protected SequentialNode(string opcode, ValueType[] argTypes, ResultType[] resultTypes) : base(opcode, argTypes, resultTypes) { }
 
-        protected Value next;
-
         public abstract void ComputeNext(float deltaTime);
 
-        public void Commit()
-        {
-            rslts[0].Value = next;
-        }
+        public abstract void Commit();
 
         public override void Evaluate(float _) { } // FFはEvaluateしない
     }
 
     class DFlipFlopNode : SequentialNode
     {
-        public Node D;
-        public Node Clock;
-
-        bool prevClock;
+        Value next;
+        bool prevT;
 
         public DFlipFlopNode() : base(
             "DFF",
@@ -235,7 +228,7 @@ namespace IGP
 
         public override void ComputeNext(float _)
         {
-            bool rising = !prevClock && args[1].Value.AsBool();
+            bool rising = !prevT && args[1].Value.AsBool();
 
             if (rising)
             {
@@ -246,17 +239,20 @@ namespace IGP
                 next = rslts[0].Value; // ホールド
             }
 
-            prevClock = args[1].Value.AsBool();
+            prevT = args[1].Value.AsBool();
+        }
+
+        public override void Commit()
+        {
+            rslts[0].Value = next;
         }
     }
 
     class RSFlipFlopNode : SequentialNode
     {
-        public Node S;
-        public Node R;
-
-        private bool prevS;
-        private bool prevR;
+        Value next;
+        bool prevS;
+        bool prevR;
 
         public RSFlipFlopNode() : base(
             "RSFF",
@@ -311,13 +307,17 @@ namespace IGP
             prevS = s;
             prevR = r;
         }
+
+        public override void Commit()
+        {
+            rslts[0].Value = next;
+        }
     }
 
     class TFlipFlopNode : SequentialNode
     {
-        public Node Clock;
-
-        private bool prevClock;
+        Value next;
+        bool prevClock;
 
         public TFlipFlopNode() : base(
             "TFF",
@@ -340,15 +340,17 @@ namespace IGP
 
             prevClock = args[0].Value.AsBool();
         }
+
+        public override void Commit()
+        {
+            rslts[0].Value = next;
+        }
     }
 
     class JKFlipFlopNode : SequentialNode
     {
-        public Node J;
-        public Node K;
-        public Node Clock;
-
-        private bool prevClock;
+        Value next;
+        bool prevClock;
 
         public JKFlipFlopNode() : base(
             "JKFF",
@@ -388,6 +390,11 @@ namespace IGP
             }
 
             prevClock = args[2].Value.AsBool();
+        }
+
+        public override void Commit()
+        {
+            rslts[0].Value = next;
         }
     }
 }
