@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 
 namespace IGP
 {
@@ -30,7 +29,6 @@ namespace IGP
     public struct Statement
     {
         public int CodeLine;
-        public Vector2Int GraphPos;
         public string Comment;
         public string Opcode;
         public string[] Args;
